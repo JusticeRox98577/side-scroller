@@ -40,13 +40,23 @@
         let groundLevel = 350;
         let obstacles = [];
         let score = 0;
+        let keys = {};
 
         function drawPlayer() {
             ctx.fillStyle = player.color;
             ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(player.x, player.y, player.width, player.height);
         }
 
         function updatePlayer() {
+            if (keys["ArrowLeft"] && player.x > 0) {
+                player.x -= player.speed;
+            }
+            if (keys["ArrowRight"] && player.x + player.width < canvas.width) {
+                player.x += player.speed;
+            }
             if (player.jumping) {
                 player.velocityY += gravity;
                 player.y += player.velocityY;
@@ -113,9 +123,14 @@
         }
 
         document.addEventListener("keydown", function(event) {
+            keys[event.key] = true;
             if (event.code === "Space") {
                 jump();
             }
+        });
+
+        document.addEventListener("keyup", function(event) {
+            keys[event.key] = false;
         });
 
         setInterval(createObstacle, 2000);
