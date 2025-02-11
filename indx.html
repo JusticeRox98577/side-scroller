@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Sidescroller Game</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: lightblue;
+        }
+        canvas {
+            display: block;
+            background: url('https://via.placeholder.com/800x400') repeat-x;
+            background-size: cover;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = 400;
+
+        let player = {
+            x: 50,
+            y: 300,
+            width: 50,
+            height: 50,
+            color: "red",
+            speed: 5,
+            jumping: false,
+            velocityY: 0
+        };
+
+        let gravity = 0.5;
+        let groundLevel = 350;
+        let obstacles = [];
+        let score = 0;
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function updatePlayer() {
+            if (player.jumping) {
+                player.velocityY += gravity;
+                player.y += player.velocityY;
+                if (player.y >= groundLevel) {
+                    player.y = groundLevel;
+                    player.jumping = false;
+                    player.velocityY = 0;
+                }
+            }
+        }
+
+        function jump() {
+            if (!player.jumping) {
+                player.jumping = true;
+                player.velocityY = -10;
+            }
+        }
+
+        function createObstacle() {
+            obstacles.push({
+                x: canvas.width,
+                y: groundLevel,
+                width: 30,
+                height: 50,
+                speed: 5
+            });
+        }
+
+        function updateObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                obstacles[i].x -= obstacles[i].speed;
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                }
+            }
+        }
+
+        function drawObstacles() {
+            ctx.fillStyle = "black";
+            for (let obs of obstacles) {
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            }
+        }
+
+        function checkCollision() {
+            for (let obs of obstacles) {
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
+                    alert("Game Over! Score: " + score);
+                    document.location.reload();
+                }
+            }
+        }
+
+        function drawScore() {
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText("Score: " + score, 20, 30);
+        }
+
+        document.addEventListener("keydown", function(event) {
+            if (event.code === "Space") {
+                jump();
+            }
+        });
+
+        setInterval(createObstacle, 2000);
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            updatePlayer();
+            updateObstacles();
+            drawObstacles();
+            checkCollision();
+            drawScore();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
